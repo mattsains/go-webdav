@@ -159,6 +159,9 @@ func NewPropfindResponse(path string, propfind *Propfind, props map[xml.Name]Pro
 		}
 	}
 
+	typeElement := NewRawXMLElement(ResourceTypeName, nil, nil)
+	typeVal, _ := props[ResourceTypeName](typeElement)
+
 	if propfind.PropName != nil {
 		for xmlName, _ := range props {
 			emptyVal := NewRawXMLElement(xmlName, nil, nil)
@@ -183,6 +186,8 @@ func NewPropfindResponse(path string, propfind *Propfind, props map[xml.Name]Pro
 			if err := resp.EncodeProp(code, val); err != nil {
 				return nil, err
 			}
+
+			resp.EncodeProp(code, typeVal)
 		}
 	} else if prop := propfind.Prop; prop != nil {
 		for _, raw := range prop.Raw {
@@ -211,6 +216,7 @@ func NewPropfindResponse(path string, propfind *Propfind, props map[xml.Name]Pro
 			if err := resp.EncodeProp(code, val); err != nil {
 				return nil, err
 			}
+			resp.EncodeProp(code, typeVal)
 		}
 	} else {
 		return nil, HTTPErrorf(http.StatusBadRequest, "webdav: request missing propname, allprop or prop element")
